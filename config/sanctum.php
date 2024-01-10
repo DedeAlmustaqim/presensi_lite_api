@@ -48,6 +48,11 @@ return [
 
     'expiration' => null,
 
+
+    'model' => [
+        'web' => App\Models\Admin::class,
+        'api' => App\Models\User::class,
+    ],
     /*
     |--------------------------------------------------------------------------
     | Sanctum Middleware

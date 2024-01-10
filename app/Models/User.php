@@ -18,11 +18,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $table = 'users';
-    // protected $fillable = [
-    //     'name',
-    //     'email',
-    //     'password',
-    // ];
+   
     protected $guarded = [];
     /**
      * The attributes that should be hidden for serialization.
@@ -45,6 +41,7 @@ class User extends Authenticatable
 
     public function unitJoin()
     {
-        return $this->join('tbl_unit', 'users.id_unit', '=', 'tbl_unit.id');
+        return $this->join('tbl_unit', 'users.id_unit', '=', 'tbl_unit.id')
+            ->select('tbl_unit.*');
     }
 }

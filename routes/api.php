@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
@@ -17,18 +18,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+
+Route::post('/api_login', [AuthController::class, 'api_login']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::prefix('user')->group(function () {
+        Route::get('/{id}', [UserController::class, 'index']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::post('/verifikasi_loc', [UserController::class, 'verifyLocation']);
+        Route::post('/qr_in', [UserController::class, 'qr_in']);
+        Route::post('/qr_out', [UserController::class, 'qr_out']);
+        Route::post('/ijin', [UserController::class, 'ijin']);
+        Route::post('/get_ijin_bulanan', [UserController::class, 'get_ijin_bulanan']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
 });
 
-Route::prefix('user')->group(function () {
-    Route::get('/{id}', [UserController::class, 'index']);
-    Route::post('/', [UserController::class, 'store']);
-    Route::post('/qr_in', [UserController::class, 'qr_in']);
-    Route::post('/qr_out', [UserController::class, 'qr_out']);
-    Route::put('/{id}', [UserController::class, 'update']);
-    Route::delete('/{id}', [UserController::class, 'destroy']);
-});
+
 
 Route::prefix('scan')->group(function () {
     Route::get('/{id}', [ScanController::class, 'index']);

@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\DateHelper;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
-    
+
     //Ambil Data User join dengan Unit
     public function userData($id)
     {
@@ -28,10 +29,10 @@ class UserController extends Controller
         $data = $this->userData($id);
         return response()->json(['data' => $data]);
     }
- 
 
 
-    
+
+
     //Verifikasi Lokasi
     public function verifyLocation(Request $request)
     {
@@ -485,19 +486,57 @@ class UserController extends Controller
 
     public function get_ijin_bulanan(Request $request)
     {
-        // $id_user = request()->input('id_user');
-        // $tahun = request()->input('tahun');
-        $bulan = $request->input('bulan');
 
-        $bulan = bulan_to_angka($bulan);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required',
+                'date' => 'required',
+            ],
+            [
+                'id.required' => 'Kolom  wajib diisi.',
+                'date.required' => 'Kolom  wajib diisi.',
+            ]
+        );
 
-        if ($bulan === null) {
-            return response()->json(['error' => 'Bulan tidak valid'], 400);
-        }
+        $validatedData = $validator->validated();
 
-        // $model = new UserModel();
-        // $data['data'] = $model->getIjin($id_user, $tahun, $bulan);
+        $date = Carbon::parse($validatedData['date']);
+        $id = $validatedData['id'];
+        $month = $date->month;
+        $year = $date->year;
 
-        return response()->json($bulan);
+        $absenModel = new AbsenModel();
+        $data = $absenModel->getIjin($month, $year, $id);
+
+        return response()->json(['data' => $data]);
+    }
+
+    public function get_rekap_bulanan(Request $request)
+    {
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required',
+                'date' => 'required',
+            ],
+            [
+                'id.required' => 'Kolom  wajib diisi.',
+                'date.required' => 'Kolom  wajib diisi.',
+            ]
+        );
+
+        $validatedData = $validator->validated();
+
+        $date = Carbon::parse($validatedData['date']);
+        $id = $validatedData['id'];
+        $month = $date->month;
+        $year = $date->year;
+
+        $absenModel = new AbsenModel();
+        $data = $absenModel->getIjin($month, $year, $id);
+
+        return response()->json(['data' => $data]);
     }
 }

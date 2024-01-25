@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/qr_out', [UserController::class, 'qr_out']);
         Route::post('/ijin', [UserController::class, 'ijin']);
         Route::post('/get_ijin_bulanan', [UserController::class, 'get_ijin_bulanan']);
+        Route::post('/get_rekap_bulanan', [UserController::class, 'get_ijin_bulanan']);
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
     });

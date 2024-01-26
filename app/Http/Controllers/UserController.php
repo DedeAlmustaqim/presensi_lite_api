@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\DateHelper;
+use App\Models\ConfigModel;
 use Carbon\Carbon;
 
 class UserController extends Controller
@@ -18,8 +19,10 @@ class UserController extends Controller
     //Ambil Data User join dengan Unit
     public function userData($id)
     {
-        $user = User::find($id);
-        $userData = $user->unitJoin()->select('users.*', 'tbl_unit.nm_unit', 'tbl_unit.lat', 'tbl_unit.long', 'tbl_unit.radius')->first();
+        $userData = User::join('tbl_unit', 'tbl_unit.id', '=', 'users.id_unit')
+        ->select('users.*', 'tbl_unit.nm_unit', 'tbl_unit.lat', 'tbl_unit.long', 'tbl_unit.radius')
+        ->where('users.id', $id)
+        ->first();
         return $userData;
     }
 
@@ -38,15 +41,18 @@ class UserController extends Controller
     {
         $id = $request->input('id');
         $data = $this->userData($id);
-
+        $data2 = ConfigModel::first();
         $userLatitude = $data['lat'];
         $userLongitude = $data['long'];
-        $userRadius = $data['radius'];
+        $userRadius = $data2->radius;
         $targetLatitude = $request->input('latitude');
         $targetLongitude = $request->input('longitude');
         $distance = $this->haversineDistance($userLatitude, $userLongitude, $targetLatitude, $targetLongitude);
 
-        if ($distance <= 0.1) { // Jarak dalam satuan kilometer (100 meter = 0.1 km)
+
+
+        $radius =  $data2->radius / 100;
+        if ($distance <= $radius) { // Jarak dalam satuan kilometer (100 meter = 0.1 km)
             return response()->json(['data' => [
                 'success' => true,
                 'koordinat' => "Latitude: " . $userLatitude . " Longitude: " . $userLongitude . " Radius : " . $userRadius . " m",
@@ -112,59 +118,106 @@ class UserController extends Controller
             ->count();
 
         if ($builder) {
+
             $cek_tgl = DB::table('tbl_absen')
                 ->select('tgl_in')
                 ->where('tgl_in', $tgl)
                 ->where('id_user', $id_user)
                 ->count();
-
-            if ($cek_tgl) {
-                $respond = [
-                    'success' => false,
-                    'status' => 0,
-                    'judul' => "Gagal",
-                    'msg' => 'Anda sudah absen masuk pada ' . $tgl,
-                    'date' => $tgl,
-                ];
-
-                return response()->json(['data' => $respond]);
-            } else {
-                $data = [
-                    'tgl_in' => $tgl,
-                    'jam_in' => now()->format('H:i:s'),
-                    'id_ket_in' => 1,
-                    'id_ket_out' => 0,
-                    'id_user' => $id_user,
-                ];
-
-                $result = DB::table('tbl_absen')->insert($data);
-
-                if ($result) {
+            $cek_tgl_out = DB::table('tbl_absen')->select('tgl_out')->where('tgl_out', $tgl)->where('id_user', $id_user)->count();
+            if (!$cek_tgl_out) {
+                if ($cek_tgl) {
                     $respond = [
-                        'success' => true,
-                        'status' => 1,
-                        'judul' => "Berhasil",
-                        'msg' => 'Tanggal Absensi ' . $tgl,
+                        'success' => false,
+                        'status' => 0,
+                        'judul' => "Gagal",
+                        'msg' => 'Anda sudah absen masuk pada ' . $tgl,
                         'date' => $tgl,
                     ];
 
                     return response()->json(['data' => $respond]);
                 } else {
-                    $respond = [
-                        'success' => false,
-                        'status' => 2,
-                        'judul' => "Gagal Absensi",
-                        'msg' => 'Terjadi Kesalahan',
+                    $data = [
+                        'tgl_in' => $tgl,
+                        'jam_in' => now()->format('H:i:s'),
+                        'id_ket_in' => 1,
+                        'id_ket_out' => 0,
+                        'id_user' => $id_user,
                     ];
 
-                    return response()->json($respond, 500);
+                    $result = DB::table('tbl_absen')->insert($data);
+
+                    if ($result) {
+                        $respond = [
+                            'success' => true,
+                            'status' => 1,
+                            'judul' => "Berhasil Check In",
+                            'msg' => 'Tanggal ' . $tgl,
+                            'date' => $tgl,
+                        ];
+
+                        return response()->json(['data' => $respond]);
+                    } else {
+                        $respond = [
+                            'success' => false,
+                            'status' => 2,
+                            'judul' => "Gagal",
+                            'msg' => 'Terjadi Kesalahan',
+                        ];
+
+                        return response()->json($respond, 500);
+                    }
+                }
+            } else {
+                if ($cek_tgl) {
+                    $respond = [
+                        'success' => false,
+                        'status' => 0,
+                        'judul' => "Gagal",
+                        'msg' => 'Anda sudah absen masuk pada ' . $tgl,
+                        'date' => $tgl,
+                    ];
+
+                    return response()->json(['data' => $respond]);
+                } else {
+                    $data = [
+                        'tgl_in' => $tgl,
+                        'jam_in' => now()->format('H:i:s'),
+                        'id_ket_in' => 1,
+                        'id_ket_out' => 0,
+                        'id_user' => $id_user,
+                    ];
+
+                    $result = DB::table('tbl_absen')->where('tgl_out', $tgl)
+                        ->update($data);;
+
+                    if ($result) {
+                        $respond = [
+                            'success' => true,
+                            'status' => 1,
+                            'judul' => "Berhasil Check In",
+                            'msg' => 'Tanggal ' . $tgl,
+                            'date' => $tgl,
+                        ];
+
+                        return response()->json(['data' => $respond]);
+                    } else {
+                        $respond = [
+                            'success' => false,
+                            'status' => 2,
+                            'judul' => "Gagal Absensi",
+                            'msg' => 'Terjadi Kesalahan',
+                        ];
+
+                        return response()->json($respond, 500);
+                    }
                 }
             }
         } else {
             $respond = [
                 'success' => false,
                 'status' => 3,
-                'judul' => "Gagal Absensi",
+                'judul' => "Gagal",
                 'msg' => 'Gagal verifikasi kode QR, silahkan coba lagi',
             ];
 
@@ -209,31 +262,73 @@ class UserController extends Controller
             ->join('users', 'users.id_unit', '=', 'tbl_qr_scan.id_unit')
             ->count();
 
-        // echo $builder;
-        // $cek_tgl = DB::table('tbl_absen')->select('tgl_in')->where('tgl_in', $tgl)->where('id_user', $id_user)->count();
-        // echo $cek_tgl;
+
 
         if ($builder) {
             $cek_tgl = DB::table('tbl_absen')->select('tgl_in')->where('tgl_in', $tgl)->where('id_user', $id_user)->count();
             if (!$cek_tgl) {
-                $respond = [
-                    'success' => false,
-                    'status'    => 0,
-                    'judul'     => "Gagal",
-                    'msg'       => 'Anda belum absen masuk pada ' . $tgl . ', lakukan absen masuk atau ajukan Ijin',
-                    'date'      => $tgl,
-                    'qr_out'    => $qr_out,
+                $data = [
+                    'id_user'           => $id_user,
+                    'tgl_out'           => $tgl,
+                    'jam_out'           => date('H:i:s'),
+                    'id_ket_out'        => 1,
                 ];
-                return response()->json(['data' => $respond]);
-            } else {
-                $cek_tgl_out = DB::table('tbl_absen')->select('tgl_out')->where('tgl_out', $tgl)->where('id_user', $id_user)->count();
 
+                $cek_tgl_out = DB::table('tbl_absen')->select('tgl_out')->where('tgl_out', $tgl)->where('id_user', $id_user)->count();
                 if ($cek_tgl_out) {
+
                     $respond = [
                         'success' => false,
                         'status'    => 0,
                         'judul'     => "Gagal",
-                        'msg'       => 'Anda sudah Absen Keluar pada ' . $tgl,
+                        'msg'       => 'Anda sudah Check Out  pada ' . $tgl,
+                        'date'      => $tgl,
+                        'qr_out'    => $qr_out,
+                    ];
+                    return response()->json(['data' => $respond]);
+                } else {
+                    $data = [
+                        'id_user'           => $id_user,
+                        'tgl_out'           => $tgl,
+                        'jam_out'           => date('H:i:s'),
+                        'id_ket_out'        => 1,
+
+
+                    ];
+                    $result = DB::table('tbl_absen')
+
+                        ->insert($data);
+                }
+
+                if ($result) {
+                    $respond = [
+                        'success' => true,
+                        'status'    => 1,
+                        'judul'     => "Berhasil Check Out",
+                        'msg'       => 'Tanggal Absensi ' . $tgl,
+                        'date'      => $tgl
+                    ];
+                    return response()->json(['data' => $respond]);
+                } else {
+                    $respond = [
+                        'success' => false,
+                        'status'    => 2,
+                        'judul'     => "Gagal Absensi",
+                        'msg'       => 'Terjadi Kesalahan',
+
+                    ];
+                    return response()->json(['data' => $respond]);
+                }
+            } else {
+                $cek_tgl_out = DB::table('tbl_absen')->select('tgl_out')->where('tgl_out', $tgl)->where('id_user', $id_user)->count();
+
+                if ($cek_tgl_out) {
+
+                    $respond = [
+                        'success' => false,
+                        'status'    => 0,
+                        'judul'     => "Gagal",
+                        'msg'       => 'Anda sudah Check Out  pada ' . $tgl,
                         'date'      => $tgl,
                         'qr_out'    => $qr_out,
                     ];
@@ -255,7 +350,7 @@ class UserController extends Controller
                     $respond = [
                         'success' => true,
                         'status'    => 1,
-                        'judul'     => "Berhasil",
+                        'judul'     => "Berhasil Check Out",
                         'msg'       => 'Tanggal Absensi ' . $tgl,
                         'date'      => $tgl
                     ];
@@ -264,7 +359,7 @@ class UserController extends Controller
                     $respond = [
                         'success' => false,
                         'status'    => 2,
-                        'judul'     => "Gagal Absensi",
+                        'judul'     => "Gagal",
                         'msg'       => 'Terjadi Kesalahan',
 
                     ];
@@ -275,7 +370,7 @@ class UserController extends Controller
             $respond = [
                 'success' => false,
                 'status' => 3,
-                'judul' => "Gagal Absensi",
+                'judul' => "Gagal",
                 'msg'      => 'Gagal verifikasi Kode QR, silahkan coba lagi',
                 'qr_out'    => $qr_out,
 
@@ -535,7 +630,7 @@ class UserController extends Controller
         $year = $date->year;
 
         $absenModel = new AbsenModel();
-        $data = $absenModel->getIjin($month, $year, $id);
+        $data = $absenModel->getRekapBulanan($month, $year, $id);
 
         return response()->json(['data' => $data]);
     }

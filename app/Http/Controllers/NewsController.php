@@ -13,7 +13,8 @@ class NewsController extends Controller
 {
     public function index()
     {
-        $data = NewsModel::orderBy('created_at','desc')->paginate();
+        $perPage = request('per_page', 5);
+        $data = NewsModel::orderBy('created_at','desc')->paginate($perPage);
         return response()->json($data);
     }
 

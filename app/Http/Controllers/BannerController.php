@@ -13,7 +13,8 @@ class BannerController extends Controller
 {
     public function index()
     {
-        $data = BannerModel::orderBy('created_at', 'desc')->paginate();
+        $perPage = request('per_page', 5);
+        $data = BannerModel::orderBy('created_at', 'desc')->paginate($perPage);
         return response()->json($data);
     }
 

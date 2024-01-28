@@ -12,7 +12,8 @@ class InfoController extends Controller
 {
     public function index()
     {
-        $data = InfoModel::orderBy('created_at', 'desc')->paginate();
+        $perPage = request('per_page', 5);
+        $data = InfoModel::orderBy('created_at', 'desc')->paginate($perPage);
         return response()->json($data);
     }
 

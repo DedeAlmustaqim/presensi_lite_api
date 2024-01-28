@@ -27,11 +27,19 @@ class AbsenModel extends Model
     public function getRekapBulanan($month, $year, $id)
     {
         return $this
-        ->select('tbl_absen.*')
-        
-        ->whereMonth('tbl_absen.created_at', $month)
+            ->select('tbl_absen.*')
+
+            ->whereMonth('tbl_absen.created_at', $month)
             ->whereYear('tbl_absen.created_at', $year)
             ->where('tbl_absen.id_user', $id)
+            ->get();
+    }
+
+    public function getToday($today)
+    {
+        return $this
+            ->select('tbl_absen.*')
+            ->whereDate('created_at', '=', $today->toDateString())
             ->get();
     }
 }

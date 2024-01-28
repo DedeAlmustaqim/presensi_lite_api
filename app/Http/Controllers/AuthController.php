@@ -32,6 +32,29 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function admin_login(Request $request)
+    {
+        $credentials = $request->only('username', 'password');
+        if (Auth::guard('web')->attempt($credentials)) {
+            $user = Auth::guard('web')->user();
+          
+            $token = $user->createToken('authToken')->plainTextToken;
+            $user['token'] = $token;
+            
+            return response()->json([
+                'success' => true,
+                'data' => $user
+            ], 200);
+        }
+    
+        return response()->json([
+            'success' => false,
+            'data' => [
+                "message" => 'Wrong email or password'
+            ]
+        ], 200);
+    }
+
     public function logout(Request $request)
     {
         $user = $request->user();

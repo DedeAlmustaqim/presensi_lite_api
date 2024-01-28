@@ -5,11 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserModel extends Model
+class InfoModel extends Model
 {
     use HasFactory;
-    protected $table='users';
-    protected $guarded=[];
-
-    
+    protected $table = 'tbl_info';
+    protected $guarded = [];
 }

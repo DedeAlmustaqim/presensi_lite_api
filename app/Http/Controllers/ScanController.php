@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ConfigModel;
 use App\Models\ScanModel;
+use App\Models\UnitModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,20 +13,7 @@ class ScanController extends Controller
     //
     public function index($id)
     {
-
-        $data1 = ScanModel::join('tbl_unit', 'tbl_unit.id', '=', 'tbl_qr_scan.id_unit')
-            ->select('tbl_qr_scan.*', 'tbl_unit.nm_unit', 'tbl_unit.lat', 'tbl_unit.long', 'tbl_unit.radius')
-            ->where('tbl_qr_scan.id_unit', $id)
-            ->first();
-
-
-        $data2 = ConfigModel::first();
-
-        $data1 = ScanModel::join('tbl_unit', 'tbl_unit.id', '=', 'tbl_qr_scan.id_unit')
-            ->select('tbl_qr_scan.*', 'tbl_unit.nm_unit', 'tbl_unit.lat', 'tbl_unit.long', 'tbl_unit.radius')
-            ->where('tbl_qr_scan.id_unit', $id)
-            ->first();
-
+        $data1 = UnitModel::select('tbl_unit.*')->where('tbl_unit.id', $id)->first();
         $data2 = ConfigModel::first();
 
         // Periksa apakah $data1 dan $data2 tidak null
@@ -43,7 +31,6 @@ class ScanController extends Controller
                 'qr_time_out_end' => $data2->qr_time_out_end,
                 'radius' => $data2->radius,
             ];
-
 
             // Kembalikan data yang digabungkan sebagai JSON
             return response()->json($result);

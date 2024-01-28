@@ -5,11 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserModel extends Model
+class BannerModel extends Model
 {
     use HasFactory;
-    protected $table='users';
-    protected $guarded=[];
-
-    
+    protected $table = "tbl_banner";
+    protected $guarded = [];
 }

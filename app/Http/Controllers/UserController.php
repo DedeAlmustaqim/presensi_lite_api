@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\DateHelper;
 use App\Models\ConfigModel;
+use App\Models\InfoModel;
+use App\Models\NewsModel;
 use Carbon\Carbon;
 
 class UserController extends Controller
@@ -20,9 +22,9 @@ class UserController extends Controller
     public function userData($id)
     {
         $userData = User::join('tbl_unit', 'tbl_unit.id', '=', 'users.id_unit')
-        ->select('users.*', 'tbl_unit.nm_unit', 'tbl_unit.lat', 'tbl_unit.long', 'tbl_unit.radius')
-        ->where('users.id', $id)
-        ->first();
+            ->select('users.*', 'tbl_unit.nm_unit', 'tbl_unit.lat', 'tbl_unit.long', 'tbl_unit.radius')
+            ->where('users.id', $id)
+            ->first();
         return $userData;
     }
 
@@ -33,8 +35,116 @@ class UserController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    public function get_by_unit($id)
+    {
+        $data = User::join('tbl_unit', 'tbl_unit.id', '=', 'users.id_unit')
+            ->select('users.*', 'tbl_unit.nm_unit', 'tbl_unit.lat', 'tbl_unit.long', 'tbl_unit.radius')
+            ->where('users.id_unit', $id)
+            ->get();
+        return response()->json(['data' => $data]);
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required',
+                'email' => 'required|email|unique:users,email',
+                'nik' => 'required|unique:users,nik',  
+                'nip' => 'required|unique:users,nip',
+                'id_unit' => 'required',
+                'jabatan' => 'required',
 
 
+            ],
+            [
+                'name.required' => 'Kolom  wajib diisi.',
+                'email.required' => 'Kolom  wajib diisi.',
+                'nik.required' => 'Kolom  wajib diisi.',
+                'nip.required' => 'Kolom  wajib diisi.',
+                'id_unit.required' => 'Kolom  wajib diisi.',
+                'jabatan.required' => 'Kolom  wajib diisi.',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'error' => $validator->errors()], 422);
+        }
+
+
+        $validatedData = $validator->validated();
+
+        $validatedData['password'] = password_hash("baritotimurkab", PASSWORD_BCRYPT);
+
+
+        try {
+            UserModel::create($validatedData);
+            return response()->json(['success' => true, 'message' => 'Success'], 201);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e], 500);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required',
+                'email' => 'required|email',
+                'nik' => 'required',  
+                'nip' => 'required',
+                'id_unit' => 'required',
+                'jabatan' => 'required',
+            ],
+            [
+                'name.required' => 'Kolom  wajib diisi.',
+                'email.required' => 'Kolom  wajib diisi.',
+                'nik.required' => 'Kolom  wajib diisi.',
+                'nip.required' => 'Kolom  wajib diisi.',
+                'id_unit.required' => 'Kolom  wajib diisi.',
+                'jabatan.required' => 'Kolom  wajib diisi.',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'error' => $validator->errors()], 422);
+        }
+
+        $validatedData = $validator->validated();
+
+        $findId = UserModel::find($id);
+
+        if (!$findId) {
+            return response()->json(['success' => false, 'message' => 'Not Found'], 404);
+        }
+
+        try {
+            $data = UserModel::findOrFail($id);
+            $data->update($validatedData);
+            return response()->json(['success' => true, 'message' => 'Success'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $findId = UserModel::find($id);
+
+        if (!$findId) {
+            return response()->json(['success' => false, 'message' => 'Not Found'], 404);
+        }
+
+        try {
+            $data = UserModel::findOrFail($id);
+            $data->delete();
+            return response()->json(['success' => true, 'message' => 'Success'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed'], 500);
+        }
+    }
 
     //Verifikasi Lokasi
     public function verifyLocation(Request $request)
@@ -110,11 +220,11 @@ class UserController extends Controller
         $tgl = $validatedData['tgl'];
         $id_user = $validatedData['id'];
 
-        $builder = DB::table('tbl_qr_scan')
+        $builder = DB::table('tbl_unit')
             ->select('qr_in')
             ->where('qr_in', $qr_in)
             ->where('users.id', $id_user)
-            ->join('users', 'users.id_unit', '=', 'tbl_qr_scan.id_unit')
+            ->join('users', 'users.id_unit', '=', 'tbl_unit.id')
             ->count();
 
         if ($builder) {
@@ -255,11 +365,11 @@ class UserController extends Controller
         $id_user = $validatedData['id'];
 
         // echo $qr_out.$tgl.$id_user;
-        $builder = DB::table('tbl_qr_scan')
+        $builder = DB::table('tbl_unit')
             ->select('qr_out')
             ->where('qr_out', $qr_out)
             ->where('users.id', $id_user)
-            ->join('users', 'users.id_unit', '=', 'tbl_qr_scan.id_unit')
+            ->join('users', 'users.id_unit', '=', 'tbl_unit.id')
             ->count();
 
 
@@ -607,6 +717,33 @@ class UserController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    public function get_today(Request $request)
+    {
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required',
+
+            ],
+            [
+                'id.required' => 'Kolom  wajib diisi.',
+
+            ]
+        );
+
+        $validatedData = $validator->validated();
+
+        $date = now();
+        $id = $validatedData['id'];
+
+
+        $absenModel = new AbsenModel();
+        $data = $absenModel->getToday($date);
+
+        return response()->json(['data' => $data]);
+    }
+
     public function get_rekap_bulanan(Request $request)
     {
 
@@ -628,6 +765,8 @@ class UserController extends Controller
         $id = $validatedData['id'];
         $month = $date->month;
         $year = $date->year;
+
+        // echo $year;
 
         $absenModel = new AbsenModel();
         $data = $absenModel->getRekapBulanan($month, $year, $id);

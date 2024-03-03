@@ -4,7 +4,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\NewsCommentModel;
 use App\Models\NewsModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -13,10 +13,12 @@ class NewsController extends Controller
 {
     public function index()
     {
-        $perPage = request('per_page', 5);
-        $data = NewsModel::orderBy('created_at','desc')->paginate($perPage);
+        $perPage = request('per_page', 10);
+        $data = NewsModel::orderBy('id', 'desc')->paginate($perPage);
         return response()->json($data);
     }
+
+   
 
     public function show($id)
     {

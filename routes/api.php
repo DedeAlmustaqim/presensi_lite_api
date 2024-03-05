@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ConfigController;
+use App\Http\Controllers\DinasController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\NewsCommentController;
 use App\Http\Controllers\NewsController;
@@ -51,6 +52,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/update_pass', [UserController::class, 'update_pass']);
         Route::post('/upload_photo', [UserController::class, 'upload_photo']);
     });
+    Route::prefix('dinas')->group(function () {
+        
+        Route::post('/tugas_dinas', [DinasController::class, 'tugas_dinas']);
+        Route::post('/dalam_daerah', [DinasController::class, 'dalam_daerah']);
+        Route::post('/luar_daerah', [DinasController::class, 'luar_daerah']);
+       
+    });
     Route::prefix('news_comment')->group(function () {
 
         Route::post('/', [NewsCommentController::class, 'store']);
@@ -86,6 +94,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [BannerController::class, 'update']);
         Route::delete('/{id}', [BannerController::class, 'destroy']);
     });
+
+   
 });
 
 

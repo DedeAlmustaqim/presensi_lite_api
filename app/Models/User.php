@@ -29,7 +29,9 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
+    protected $dates = [
+        'available_login',
+    ];
     /**
      * The attributes that should be cast.
      *

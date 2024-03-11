@@ -30,6 +30,7 @@ class UserController extends Controller
                 'users.nip',
                 'users.jabatan',
                 'users.img',
+                'users.is_agree',
                 'tbl_unit.nm_unit',
                 'tbl_unit.lat',
                 'tbl_unit.long'
@@ -833,6 +834,41 @@ class UserController extends Controller
             return response()->json(['success' => true, 'message' => 'Foto berhasil diunggah'], 201);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Gagal mengunggah foto', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function is_agree(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required',
+             
+            ],
+            [
+                'id.required' => 'Kolom  wajib diisi.',
+               
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'error' => $validator->errors()], 422);
+        }
+
+        $validatedData = $validator->validated();
+        $validatedData['is_agree'] = true;
+        $findId = UserModel::find($validatedData['id']);
+
+        if (!$findId) {
+            return response()->json(['success' => false, 'message' => 'Not Found'], 404);
+        }
+    
+        try {
+            $data = UserModel::findOrFail($validatedData['id']);
+            $data->update($validatedData);
+            return response()->json(['success' => true, 'message' => 'Success'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e], 500);
         }
     }
 }

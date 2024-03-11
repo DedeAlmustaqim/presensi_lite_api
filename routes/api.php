@@ -5,6 +5,7 @@ use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\DinasController;
 use App\Http\Controllers\InfoController;
+use App\Http\Controllers\IzinController;
 use App\Http\Controllers\NewsCommentController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ScanController;
@@ -51,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [UserController::class, 'destroy']);
         Route::post('/update_pass', [UserController::class, 'update_pass']);
         Route::post('/upload_photo', [UserController::class, 'upload_photo']);
+        Route::post('/is_agree', [UserController::class, 'is_agree']);
     });
     Route::prefix('dinas')->group(function () {
         
@@ -58,6 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/dalam_daerah', [DinasController::class, 'dalam_daerah']);
         Route::post('/luar_daerah', [DinasController::class, 'luar_daerah']);
        
+    });
+    Route::prefix('izin')->group(function () {
+        Route::post('/izin_sehari', [IzinController::class, 'izin_sehari']);
     });
     Route::prefix('news_comment')->group(function () {
 

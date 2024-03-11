@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-class DinasController extends Controller
+class IzinController extends Controller
 {
-    public function tugas_dinas(Request $request)
+    public function izin_sehari(Request $request)
     {
         $validator = Validator::make(
             $request->all(),
@@ -17,15 +17,11 @@ class DinasController extends Controller
                 'id' => 'required',
                 'date' => 'required',
                 'ket' => 'required',
+                'jns' => 'required',
                 'part_day' => 'required',
                 'no_surat' => 'required',
             ],
-            [
-                'date' => 'required',
-                'ket' => 'required',
-                'part_day' => 'required',
-                'no_surat' => 'required',
-            ]
+           
         );
 
         if ($validator->fails()) {
@@ -39,6 +35,7 @@ class DinasController extends Controller
 
         $date = $validatedData['date'];
         $id = $validatedData['id'];
+        $jns = $validatedData['jns'];
         $ket = $validatedData['ket'];
         $no_surat = $validatedData['no_surat'];
         $part_day = $validatedData['part_day'];
@@ -63,7 +60,7 @@ class DinasController extends Controller
             if (!$cek_tgl_in && !$cek_tgl_out) {
                 $data = [
                     'tgl_in' => $date,
-                    'id_ket_in' => 2,
+                    'id_ket_in' => $jns,
                     'id_user' => $id,
                 ];
                 $data2 = [
@@ -71,7 +68,7 @@ class DinasController extends Controller
                     'no_surat_in' => $no_surat,
                     'ket_in' => $ket,
                     'id_user' => $id,
-                    'created_at' => $date
+                    'created_at'=>$date
 
 
                 ];
@@ -84,7 +81,7 @@ class DinasController extends Controller
                         'success' => true,
                         'status' => 1,
                         'judul' => "Berhasil",
-                        'msg' => 'Absen Tugas Dinas Check In pada Tanggal ' . $date,
+                        'msg' => 'Izin Check In pada Tanggal ' . $date,
                         'date' => $date,
                     ];
 
@@ -103,7 +100,7 @@ class DinasController extends Controller
 
                 $data = [
                     'tgl_in' => $date,
-                    'id_ket_in' => 2,
+                    'id_ket_in' => $jns,
                     'id_user' => $id,
                 ];
                 $data2 = [
@@ -123,7 +120,7 @@ class DinasController extends Controller
                         'success' => true,
                         'status' => 1,
                         'judul' => "Berhasil",
-                        'msg' => 'Absen Tugas Dinas Check In pada Tanggal ' . $date,
+                        'msg' => 'Izin Check In pada Tanggal ' . $date,
                         'date' => $date,
                     ];
 
@@ -163,7 +160,7 @@ class DinasController extends Controller
             if (!$cek_tgl_in && !$cek_tgl_out) {
                 $data = [
                     'tgl_out' => $date,
-                    'id_ket_out' => 2,
+                    'id_ket_out' => $jns,
                     'id_user' => $id,
                     'created_at' => $date
                 ];
@@ -184,7 +181,7 @@ class DinasController extends Controller
                         'success' => true,
                         'status' => 1,
                         'judul' => "Berhasil ",
-                        'msg' => 'Absen Tugas Dinas Check Out pada Tanggal ' . $date,
+                        'msg' => 'Izin Check Out pada Tanggal ' . $date,
                         'date' => $date,
                     ];
 
@@ -203,7 +200,7 @@ class DinasController extends Controller
 
                 $data = [
                     'tgl_out' => $date,
-                    'id_ket_out' => 2,
+                    'id_ket_out' => $jns,
                     'id_user' => $id,
                     'created_at' => $date
                 ];
@@ -224,7 +221,7 @@ class DinasController extends Controller
                         'success' => true,
                         'status' => 1,
                         'judul' => "Berhasil ",
-                        'msg' => 'Absen Tugas Dinas Check Out pada Tanggal ' . $date,
+                        'msg' => 'Izin Check Out pada Tanggal ' . $date,
                         'date' => $date,
                     ];
 
@@ -265,9 +262,9 @@ class DinasController extends Controller
             if (!$cek_tgl_in && !$cek_tgl_out) {
                 $data = [
                     'tgl_in' => $date,
-                    'id_ket_in' => 2,
+                    'id_ket_in' => $jns,
                     'tgl_out' => $date,
-                    'id_ket_out' => 2,
+                    'id_ket_out' => $jns,
                     'id_user' => $id,
                     'created_at' => $date
                 ];
@@ -297,7 +294,7 @@ class DinasController extends Controller
                         'success' => true,
                         'status' => 1,
                         'judul' => "Berhasil ",
-                        'msg' => 'Absen Tugas Dinas Check In dan Out pada Tanggal ' . $date,
+                        'msg' => 'Izin Check In dan Out pada Tanggal ' . $date,
                         'date' => $date,
                     ];
 
@@ -326,7 +323,7 @@ class DinasController extends Controller
         }
     }
 
-    public function dalam_daerah(Request $request)
+    public function izin_more_day(Request $request)
     {
         $validator = Validator::make(
             $request->all(),
@@ -352,6 +349,7 @@ class DinasController extends Controller
         $dateStart = $validatedData['date_start'];
         $dateEnd = $validatedData['date_end'];
         $id = $validatedData['id'];
+        $jns = $validatedData['jns'];
         $ket = $validatedData['ket'];
         $no_surat = $validatedData['no_surat'];
 
@@ -360,7 +358,7 @@ class DinasController extends Controller
             $respond = [
                 'success' => false,
                 'judul' => "Gagal",
-                'msg' => 'Tanggal kembali tidak boleh kurang dari tanggal berangkat.',
+                'msg' => 'Tanggal sampai tidak boleh kurang dari tanggal dari.',
 
             ];
 
@@ -389,9 +387,9 @@ class DinasController extends Controller
                 while ($currentDate <= $dateEnd) {
                     $data[] = [
                         'tgl_in' => $currentDate,
-                        'id_ket_in' => 3,
+                        'id_ket_in' => $jns,
                         'tgl_out' => $currentDate,
-                        'id_ket_out' => 3,
+                        'id_ket_out' => $jns,
                         'id_user' => $id,
                         'created_at' => $currentDate
                     ];
@@ -424,7 +422,7 @@ class DinasController extends Controller
                     $respond = [
                         'success' => true,
                         'judul' => "Berhasil ",
-                        'msg' => 'Absen  Dinas Dalam Daerah pada Tanggal ' . $dateStart . ' s/d ' . $dateEnd,
+                        'msg' => 'Izin pada Tanggal ' . $dateStart . ' s/d ' . $dateEnd,
 
                     ];
 

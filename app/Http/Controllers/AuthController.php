@@ -17,14 +17,13 @@ class AuthController extends Controller
             $user = Auth::guard('api')->user();
             // $unitData = $user->unit;
             // $user = User::with('unit')->find($user->id);
-            $token = $user->createToken('authToken')->plainTextToken;
-            $user['token'] = $token;
+          
             // Periksa apakah waktu login kurang dari available_login
             // Periksa apakah waktu login kurang dari available_login
             if (Carbon::now() < $user->available_login) {
                 $diff = $user->available_login->diff(Carbon::now());
              
-                $timeLeft = $diff->format('%h jam and %i menit');
+                $timeLeft = $diff->format('%h jam  %i menit');
                 return response()->json([
                     'success' => false,
                     'data' => [
@@ -32,7 +31,8 @@ class AuthController extends Controller
                     ]
                 ], 200);
             }
-
+            $token = $user->createToken('authToken')->plainTextToken;
+            $user['token'] = $token;
             return response()->json([
                 'success' => true,
                 'data' => ['id' => $user['id'], 'id_unit' => $user['id_unit'], 'token' => $user['token']]

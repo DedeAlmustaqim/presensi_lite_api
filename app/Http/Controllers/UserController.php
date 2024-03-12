@@ -736,6 +736,31 @@ class UserController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    public function get_day(Request $request)
+    {
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'id' => 'required',
+                'date' => 'required',
+
+            ],
+           
+        );
+
+        $validatedData = $validator->validated();
+
+        $date = $validatedData['date'];;
+        $id = $validatedData['id'];
+
+
+        $absenModel = new AbsenModel();
+        $data = $absenModel->getDay($date, $id);
+
+        return response()->json(['data' => $data]);
+    }
+
     public function get_rekap_bulanan(Request $request)
     {
 

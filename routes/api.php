@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ConfigController;
+use App\Http\Controllers\CutiController;
 use App\Http\Controllers\DinasController;
 use App\Http\Controllers\InfoController;
 use App\Http\Controllers\IzinController;
@@ -48,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/get_ijin_bulanan', [UserController::class, 'get_ijin_bulanan']);
         Route::post('/get_rekap_bulanan', [UserController::class, 'get_rekap_bulanan']);
         Route::post('/get_today', [UserController::class, 'get_today']);
+        Route::post('/get_day', [UserController::class, 'get_day']);
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
         Route::post('/update_pass', [UserController::class, 'update_pass']);
@@ -63,7 +65,13 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::prefix('izin')->group(function () {
         Route::post('/izin_sehari', [IzinController::class, 'izin_sehari']);
+        Route::post('/izin_more_day', [IzinController::class, 'izin_more_day']);
     });
+
+    Route::prefix('cuti')->group(function () {
+        Route::post('/cuti_add', [CutiController::class, 'cuti_add']);
+    });
+
     Route::prefix('news_comment')->group(function () {
 
         Route::post('/', [NewsCommentController::class, 'store']);

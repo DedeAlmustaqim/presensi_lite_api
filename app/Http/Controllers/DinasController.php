@@ -65,13 +65,14 @@ class DinasController extends Controller
                     'tgl_in' => $date,
                     'id_ket_in' => 2,
                     'id_user' => $id,
+                    'created_at' => $date
                 ];
                 $data2 = [
                     'tgl_in_off' => $date,
                     'no_surat_in' => $no_surat,
                     'ket_in' => $ket,
                     'id_user' => $id,
-                    'created_at' => $date
+                    
 
 
                 ];

@@ -69,9 +69,6 @@ class IzinController extends Controller
                     'no_surat_in' => $no_surat,
                     'ket_in' => $ket,
                     'id_user' => $id,
-                    
-
-
                 ];
 
                 $result = DB::table('tbl_absen')->insert($data);
